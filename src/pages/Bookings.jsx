@@ -3,6 +3,8 @@ import React, { Component } from "react";
 import AuthContext from "../context/auth-context";
 import Spinner from "../components/Spinner/Spinner";
 
+import BookingList from "../components/Booking/BookingList/BookingList";
+
 export default class BookingsPage extends Component {
   state = {
     isLoading: false,
@@ -56,21 +58,62 @@ export default class BookingsPage extends Component {
       }
     } catch (err) {
       console.log(err);
+      this.setState({ isLoading: false });
     }
   };
+
+  cancelBookingHandler = async (bookingId) => {
+    this.setState({ isLoading: true });
+    let payload = {
+      query: `
+            mutation{
+              cancelBooking(bookingId:"${bookingId}"){
+              title
+              description
+            }
+          }
+      `,
+    };
+
+    const token = this.context.token;
+    try {
+      const submitURL = await fetch("http://localhost:3000/graphql", {
+        method: "POST",
+        body: JSON.stringify(payload),
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + token,
+        },
+      });
+      if (submitURL.ok) {
+        const responseJson = await submitURL.json();
+        console.log("Booking Response", responseJson);
+        this.setState((prevState) => {
+          const updatedBookings = prevState.bookings.filter((booking) => {
+            return booking._id !== bookingId;
+          });
+          return { bookings: updatedBookings, isLoading: false };
+        });
+        // const booking = responseJson.data.events;
+      }
+    } catch (err) {
+      console.log(err);
+      this.setState({ isLoading: false });
+    }
+  };
+
   render() {
     return (
       <>
+        <h1>Bookings Page</h1>
         {this.state.isLoading ? (
           <Spinner />
         ) : (
           <div>
-            <h1>Bookings Page</h1>
-            <ul>
-              {this.state.bookings.map((booking) => (
-                <li key={booking._id}> {booking.event.title}</li>
-              ))}
-            </ul>
+            <BookingList
+              bookings={this.state.bookings}
+              cancelBookingHandler={this.cancelBookingHandler}
+            ></BookingList>
           </div>
         )}
       </>

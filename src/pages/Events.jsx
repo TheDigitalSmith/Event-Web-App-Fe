@@ -186,11 +186,12 @@ export default class EventsPage extends Component {
       if (submitURL.ok) {
         const responseJson = await submitURL.json();
         console.log("Booking Response", responseJson);
+        this.setState({ isLoading: false, selectedEvent: null });
         // const booking = responseJson.data.events;
       }
     } catch (err) {
       console.log(err);
-      this.setState({ isLoading: false });
+      this.setState({ isLoading: false, selectedEvent: null });
     }
   };
 
