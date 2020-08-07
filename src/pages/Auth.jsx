@@ -32,21 +32,25 @@ export default class AuthPage extends Component {
 
     let payload = {
       query: `
-      query{
-        login(email:"${email}", password:"${password}"){
+      query signinUser($email: String!, $password: String!) {
+        login(email:$email, password: $password){
           userId
           token
           tokenExpiration
         }
       }
       `,
+      variables: {
+        email: email,
+        password: password,
+      },
     };
 
     if (!this.state.isLogin) {
       payload = {
         query: `
-        mutation{
-          createUser(userInput:{email:"${email}", password:"${password}"}){
+        mutation signupUser($email:String!, $password:String!){
+          createUser(userInput:{email:$email, password:$password}){
             _id
             email
             password
@@ -56,6 +60,10 @@ export default class AuthPage extends Component {
           }
         }
         `,
+        variables: {
+          email: email,
+          password: password,
+        },
       };
     }
 

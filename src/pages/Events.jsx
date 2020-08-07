@@ -59,8 +59,8 @@ export default class EventsPage extends Component {
 
     let payload = {
       query: `
-            mutation{
-              createEvent(eventInput:{title:"${title}", price:${price}, date:"${date}", description:"${description}"}){
+            mutation createNewEvent($title: String!, $price:Float!, $date:String! $description: String!){
+              createEvent(eventInput:{title:$title, price:$price, date:$date, description:$description}){
               _id
               title
               description
@@ -69,6 +69,12 @@ export default class EventsPage extends Component {
             }
           }
       `,
+      variables: {
+        title: title,
+        price: +price,
+        date: date,
+        description: description,
+      },
     };
 
     const token = this.context.token;
@@ -155,8 +161,8 @@ export default class EventsPage extends Component {
   bookEventHandler = async () => {
     let payload = {
       query: `
-            mutation{
-              bookEvent(eventId:"${this.state.selectedEvent._id}"){
+            mutation bookingEvent($_id: ID!){
+              bookEvent(eventId:$_id){
               _id
               createdAt
               updatedAt
@@ -171,6 +177,9 @@ export default class EventsPage extends Component {
             }
           }
       `,
+      variables: {
+        _id: this.state.selectedEvent._id,
+      },
     };
 
     const token = this.context.token;
@@ -184,6 +193,7 @@ export default class EventsPage extends Component {
         },
       });
       if (submitURL.ok) {
+        console.log("submit", submitURL);
         const responseJson = await submitURL.json();
         console.log("Booking Response", responseJson);
         this.setState({ isLoading: false, selectedEvent: null });

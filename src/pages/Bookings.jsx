@@ -66,13 +66,16 @@ export default class BookingsPage extends Component {
     this.setState({ isLoading: true });
     let payload = {
       query: `
-            mutation{
-              cancelBooking(bookingId:"${bookingId}"){
+            mutation deleteBooking($booking: ID!){
+              cancelBooking(bookingId:$booking){
               title
               description
             }
           }
       `,
+      variables: {
+        booking: bookingId,
+      },
     };
 
     const token = this.context.token;
