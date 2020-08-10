@@ -4,11 +4,14 @@ import AuthContext from "../context/auth-context";
 import Spinner from "../components/Spinner/Spinner";
 
 import BookingList from "../components/Booking/BookingList/BookingList";
+import BookingsChart from "../components/Booking/BookingsChart/BookingsChart";
+import BookingsControls from "../components/Booking/BookingControls/BookingsControls";
 
 export default class BookingsPage extends Component {
   state = {
     isLoading: false,
     bookings: [],
+    outputType: "list",
   };
   static contextType = AuthContext;
 
@@ -27,6 +30,7 @@ export default class BookingsPage extends Component {
               event{
                 _id
                 title
+                price
                 creator{
                   email
                 }
@@ -105,20 +109,41 @@ export default class BookingsPage extends Component {
     }
   };
 
+  outputTypeHandler = (outputType) => {
+    if (outputType === "list") {
+      this.setState({ outputType: "list" });
+    } else {
+      this.setState({ outputType: "chart" });
+    }
+    console.log("state", this.state);
+  };
   render() {
+    let content = <Spinner />;
+    if (!this.state.isLoading) {
+      content = (
+        <>
+          <BookingsControls
+            activeOutputType={this.state.outputType}
+            outputTypeHandler={this.outputTypeHandler}
+          />
+          <div>
+            {this.state.outputType === "list" ? (
+              <BookingList
+                bookings={this.state.bookings}
+                cancelBookingHandler={this.cancelBookingHandler}
+              />
+            ) : (
+              <BookingsChart bookings={this.state.bookings} />
+            )}
+          </div>
+        </>
+      );
+    }
+
     return (
       <>
         <h1>Bookings Page</h1>
-        {this.state.isLoading ? (
-          <Spinner />
-        ) : (
-          <div>
-            <BookingList
-              bookings={this.state.bookings}
-              cancelBookingHandler={this.cancelBookingHandler}
-            ></BookingList>
-          </div>
-        )}
+        {content}
       </>
     );
   }
